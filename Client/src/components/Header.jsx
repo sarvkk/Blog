@@ -30,7 +30,7 @@ export default function () {
                 <FaMoon />
             </Button>
             <Link to="/sign-in">
-            <Button className='bg-neutral-500' >
+            <Button className='bg-neutral-500'outline>
                 Sign In
             </Button>
             </Link>  
