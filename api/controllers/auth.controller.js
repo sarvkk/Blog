@@ -1,6 +1,9 @@
 import User from "../models/user.model.js"
 import bcryptjs from 'bcryptjs'
 import errorHandler from '../utils/error.js'
+import jwt from 'jsonwebtoken'
+import dotenv from 'dotenv'
+
 
 export const signup =  async (req,res,next)=>{
     const {username,email,password}= req.body;
@@ -28,5 +31,32 @@ export const signup =  async (req,res,next)=>{
         next(err);
     }
 }
-
-
+dotenv.config()
+export const signin = async (req,res,next)=>{
+    const{email,password}=req.body; 
+    if( !email || 
+        !password || 
+        email==='' ||
+         password===''
+    ){
+        next(errorHandler(400,'Fill out both fields'))
+    }
+    const hashedPassword=bcryptjs.hashSync(password,10);
+    try{
+        const validUser=await User.findOne({email})
+        if(!validUser){
+            next(errorHandler(404,'User not found'))
+        }
+        const matchValidPassword=bcryptjs.compareSync(password,validUser.password);
+        if(!matchValidPassword){
+            return next(errorHandler(400,'Invalid credentials'))
+        }   
+        const token=jwt.sign({id:validUser._id,},process.env.JWT_SECRET);
+        const{password:pass,...rest}=validUser._doc;
+        res.status(200).cookie('secrettoken',token,{httpOnly:true,}).json(rest)
+    } 
+    catch(err){
+        next(err)
+    }
+    
+}
