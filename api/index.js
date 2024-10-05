@@ -22,8 +22,6 @@ mongoose
     console.log(err)}
 )
 
-
-
 app.use('/api/user',userRoutes)
 app.use('/api/auth',authRoutes)
 
