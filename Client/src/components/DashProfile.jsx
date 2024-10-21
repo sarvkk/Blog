@@ -1,3 +1,4 @@
+//5:12:52
 import {useSelector} from 'react-redux';
 import {TextInput,Button, Alert} from 'flowbite-react';
 import { useEffect, useState, useRef } from 'react';
@@ -13,7 +14,10 @@ export default function DashProfile() {
     const [imageFile,setImageFile]=useState(null);
     const [imageFileUrl,setImageFileUrl]=useState(null);
     const [imageFileUploadingProgress,setImageFileUploadingProgress]=useState(null);
+    const [updateUserSuccess,setUpdateUserSuccess]=useState(null);
     const [imageFileUploadingError,setImageFileUploadingError]=useState(null);
+    const [imageFileUploading,setImageFileUploading]=useState(null);
+    const [updatedUserError,setUpdatedUserError]=useState(null);
     const [formData,setFormData]=useState({})
     const dispatch=useDispatch();
     const filePickerRef=useRef(null);
@@ -23,7 +27,6 @@ export default function DashProfile() {
             setImageFile(file);
             setImageFileUrl(URL.createObjectURL(file))
             }
-        
     }
     useEffect(()=>{
         if(imageFile){
@@ -32,6 +35,7 @@ export default function DashProfile() {
         }
     },[imageFile]);
     const uploadImage = async () => {
+      setImageFileUploading(true);
       setImageFileUploadingError(null);
         const storage = getStorage(app);
         const fileName = new Date().getTime() + imageFile.name;
@@ -49,12 +53,19 @@ export default function DashProfile() {
             setImageFileUploadingProgress(null);
             setImageFile(null);
             setImageFileUrl(null);
+            setImageFileUploading(false);
           },
          
-          () => { // <- Corrected here
-            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-              setImageFileUrl(downloadURL);
-            });
+          async () => {
+            //  // <- Corrected here
+            // getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            //   setImageFileUrl(downloadURL);
+            // });
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            setImageFileUrl(downloadURL);
+            // Update formData with the new profile picture URL
+            setFormData((prev) => ({ ...prev, profilePicture: downloadURL }));
+            setImageFileUploading(false)
           }
         );
       };
@@ -63,9 +74,16 @@ export default function DashProfile() {
       }
     const handlesubmit=async (e)=>{
       e.preventDefault();
+      setUpdatedUserError(null);
+      setUpdateUserSuccess(null);
       if(Object.keys(formData).length===0){
+        setUpdatedUserError('No changes made')
         return;
       }
+      if(imageFileUploading){
+        return;
+      }
+
       try{
         dispatch(updateStart());
         const res= await fetch(`/api/user/update/${currentUser._id}`,{
@@ -78,9 +96,11 @@ export default function DashProfile() {
       const data= await res.json();
       if(!res.ok){
         dispatch(updateFailure(data.message));
+        setUpdatedUserError(data.messsage);
       }
       else{
         dispatch(updateSuccess(data));
+        setUpdateUserSuccess("User's profile updated successfully");
       }
       }
         catch(error){
@@ -126,11 +146,22 @@ export default function DashProfile() {
             <Button type='submit' className='bg-neutral-500'> 
                 Update
             </Button>
+            </form>
             <div className="text-red-500 flex justify-between mt-5">
                 <span className='cursor-pointer'>Delete Account</span>
                 <span className='cursor-pointer'>Sign Out</span>
             </div>
-        </form>
+       {updateUserSuccess && (
+          <Alert color='success' className='mt-5'>
+            {updateUserSuccess}
+          </Alert>
+        )
+       }
+       {updatedUserError && (
+          <Alert color='failure' className='mt-5'>
+            {updatedUserError}
+          </Alert>
+        )}
     </div>
   )
 }
