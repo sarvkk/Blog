@@ -27,7 +27,7 @@ return (
       {tab==='profile' && <DashProfile />}
       {/* posts... */}
       {tab === 'posts' && <DashPosts />}
-      {/* users... */}
+      {/* users */}
       {tab === 'users' && <DashUsers />} 
     </div>
     )
