@@ -14,7 +14,7 @@ export default function DashPosts() {
     useEffect(() => {
         const fetchPosts = async () => {
             try{
-                const res =await fetch(`/api/post/getposts?userId=${currentUser._id}`)
+                const res =await fetch(`/api/post/getposts?${currentUser._id}`)
                 const data =await res.json()
                 if(res.ok){
                     setUserPosts(data.posts)
@@ -35,17 +35,15 @@ export default function DashPosts() {
     const handleShowMore = async () => {
         const startIndex = userPosts.length;
         try{
-            const res = await fetch(`/api/post/getposts/?userId=${currentUser._id}&startIndex=${startIndex}`);
+            const res = await fetch(`/api/post/getposts?userId=${currentUser._id}&startIndex=${startIndex}`);
             const data=await res.json();
             if(res.ok){
                 setUserPosts((prev)=>[...prev,...data.posts]);
                 if(data.posts.length < 9){
                     setShowMore(false)
-            }
-        }
-        }
+            }}}
         catch(error){
-
+        console.log(error.message)
         }
     }
     const handleDeletePost = async () => {
