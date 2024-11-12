@@ -18,9 +18,9 @@ export default function CallToAction() {
                 </a>
                 </Button>
                 </div>
-            <div className="p-7">
+            <div className="p-7 flex-1">
                 <img src="https://d3lkc3n5th01x7.cloudfront.net/wp-content/uploads/2023/11/07002655/Machine-Learning-Services-banner.png" />
-        </div>
+            </div>
     </div>
   )
 }
